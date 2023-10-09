@@ -1,0 +1,51 @@
+import os
+
+
+def generate_torrc():
+    with open('/etc/service/tor/torrc.tpl', encoding='utf-8') as template:
+        config = template.read()
+        for i in range(get_tors()):
+            with open('/etc/service/tor/torrc.{}'.format(10000 + i), encoding='utf-8', mode='a') as f:
+                f.write(config.format(port=10000 + i))
+
+
+def generate_haproxy_cfg():
+    entry = '    server  app{i} 127.0.0.1:{http_port} check'
+    with open('/etc/service/haproxy/haproxy.tpl', encoding='utf-8') as template:
+        config = template.read()
+        with open('/etc/service/haproxy/haproxy.cfg', encoding='utf-8', mode='w') as f:
+            f.write(config.format(
+                server_list='\n'.join([entry.format(i=20000 + i, http_port=20000 + i) for i in range(get_tors())])))
+
+
+def generate_privoxy_cfg():
+    with open('/etc/service/privoxy/privoxy.tpl', encoding='utf-8') as template:
+        config = template.read()
+        for i in range(get_tors()):
+            with open('/etc/service/privoxy/config.{}'.format(20000 + i), encoding='utf-8', mode='w') as f:
+                f.write(config.format(port=10000 + i, http_port=20000 + i))
+
+
+def generate_shell():
+    tor_entry = '/usr/bin/tor -f /etc/service/tor/torrc.{i} '
+    privoxy_entry = '/usr/sbin/privoxy /etc/service/privoxy/config.{i} '
+    with open('/etc/service/tor/shell.tpl', encoding='utf-8') as template:
+        config = template.read()
+        if not os.path.exists('/usr/local/bin'):
+            os.makedirs('/usr/local/bin')
+        with open('/usr/local/bin/goproxy.sh', encoding='utf-8', mode='w') as f:
+            f.write(config.format(
+                tor_instances='&\n'.join([tor_entry.format(i=10000 + i) for i in range(get_tors())]),
+                privoxy_instances='&\n'.join([privoxy_entry.format(i=20000 + i) for i in range(get_tors())]),
+            ))
+
+
+def get_tors():
+    return int(os.environ.get('tors')) if os.environ.get('tors') else 10
+
+
+if __name__ == '__main__':
+    generate_torrc()
+    generate_haproxy_cfg()
+    generate_privoxy_cfg()
+    generate_shell()
