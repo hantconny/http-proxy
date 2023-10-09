@@ -1,12 +1,12 @@
-# socks-proxy
-在Docker容器内使用多个Tor进行socks5代理，在对性能没有要求的情况下，也可以当作免费的IP池供爬虫使用，对抗反爬。
+# http-proxy
+在Docker容器内使用多个Tor+Privoxy进行http代理，在对性能没有要求的情况下，也可以当作免费的IP池供爬虫使用，对抗反爬。
 
 
 
 ### 构建镜像
 
 ```shell
-$ docker build -t 'hantconny/tor-socks-proxy:v1' .
+$ docker build -t 'tor-http-proxy:v1' .
 ```
 
 
@@ -14,14 +14,14 @@ $ docker build -t 'hantconny/tor-socks-proxy:v1' .
 ### 启动容器
 
 ```shell
-$ docker run -d -p 5000:5000/tcp -p 1080:1080/tcp -e tors=25 --name tor-socks-proxy tor-socks-proxy:v1
+$ docker run -d -p 5000:5000 -p 1080:1080 -e tors=25 --name tor-http-proxy tor-http-proxy:v1
 ```
 
 如需在一台机器上启动多个容器，则可以使用如下的命令：
 
 ```shell
-$ docker run -d -p 5001:5000/tcp -p 1081:1080/tcp -e tors=25 --name tor-socks-proxy-0 tor-socks-proxy:v1
-$ docker run -d -p 5001:5000/tcp -p 1081:1080/tcp -e tors=25 --name tor-socks-proxy-1 tor-socks-proxy:v1
+$ docker run -d -p 5001:5000 -p 1081:1080 -e tors=25 --name tor-http-proxy-0 tor-http-proxy:v1
+$ docker run -d -p 5001:5000 -p 1081:1080 -e tors=25 --name tor-http-proxy-1 tor-http-proxy:v1
 ...
 ```
 
@@ -29,11 +29,11 @@ $ docker run -d -p 5001:5000/tcp -p 1081:1080/tcp -e tors=25 --name tor-socks-pr
 
 ### 端口说明
 
-5000端口用于外部程序连接到容器内的HAProxy进行socks5代理，可以在`files/haproxy.tpl`中进行修改该端口。如在Python3中：
+5000端口用于外部程序连接到容器内的HAProxy进行http代理，可以在`files/haproxy.tpl`中进行修改该端口。如在Python3中：
 
 ```python
 port = 5000
-proxy_str = 'socks5://127.0.0.1:{port}'
+proxy_str = 'http://127.0.0.1:{port}'
 tor_socks5_proxy = {
     'http': proxy_str.format(port=port),
     'https': proxy_str.format(port=port)
@@ -47,7 +47,7 @@ resp = get(url=url, headers=headers, proxies=tor_socks5_proxy, verify=False)
 
 ### 参数说明
 
-环境变量tors用于配置容器内的Tor实例个数。如果不指定，默认为10个。
+环境变量tors用于配置容器内的Tor实例和Privoxy实例的个数。如果不指定，默认为10个。
 
 
 
