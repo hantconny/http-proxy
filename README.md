@@ -34,11 +34,11 @@ $ docker run -d -p 5001:5000 -p 1081:1080 -e tors=25 --name tor-http-proxy-1 tor
 ```python
 port = 5000
 proxy_str = 'http://127.0.0.1:{port}'
-tor_socks5_proxy = {
+tor_http_proxy = {
     'http': proxy_str.format(port=port),
     'https': proxy_str.format(port=port)
 }
-resp = get(url=url, headers=headers, proxies=tor_socks5_proxy, verify=False)
+resp = get(url=url, headers=headers, proxies=tor_http_proxy, verify=False)
 ```
 
 1080端口用于从页面上监控HAProxy，可以在`files/haproxy.tpl`中进行修改，并通过`http://localhost:1080/admin?stats`进行访问。
