@@ -20,7 +20,7 @@ $ docker run -d -p 5000:5000 -p 1080:1080 -e tors=25 --name tor-http-proxy tor-h
 如需在一台机器上启动多个容器，则可以使用如下的命令：
 
 ```shell
-$ docker run -d -p 5001:5000 -p 1081:1080 -e tors=25 --name tor-http-proxy-0 tor-http-proxy:v1
+$ docker run -d -p 5000:5000 -p 1080:1080 -e tors=25 --name tor-http-proxy-0 tor-http-proxy:v1
 $ docker run -d -p 5001:5000 -p 1081:1080 -e tors=25 --name tor-http-proxy-1 tor-http-proxy:v1
 ...
 ```
